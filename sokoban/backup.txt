@@ -1,0 +1,158 @@
+
+
+from tkinter import *
+import tkinter as tk
+from tkinter import messagebox
+from tkinter import font
+from PIL import ImageTk,Image
+
+main_window = tk.Tk()
+# main_window.geometry("720x720+20+20")
+# main_window.resizable(False,False)
+# main_window.title("Fix Me")
+main_window.overrideredirect(True)
+main_window.geometry("{0}x{1}+0+0".format(main_window.winfo_screenwidth(), main_window.winfo_screenheight()))
+main_window.focus_set()
+main_window.bind("<Escape>", lambda e: main_window.quit())
+main_window.configure(background="#009900")
+
+number_of_row = 12
+
+grid_size = int(800/number_of_row)
+
+
+
+box_img = Image.open("C:\\Users\\SWAPNIL\\Desktop\\my project\\Fix ME\\box.png")
+box_img = box_img.resize((grid_size,grid_size))
+box_img = ImageTk.PhotoImage(box_img)
+
+destination_img = Image.open("C:\\Users\\SWAPNIL\\Desktop\\my project\\Fix ME\\destination.png")
+destination_img = destination_img.resize((grid_size,grid_size))
+destination_img = ImageTk.PhotoImage(destination_img)
+
+player_img = Image.open("C:\\Users\\SWAPNIL\\Desktop\\my project\\Fix ME\\player.png")
+player_img = player_img.resize((grid_size,grid_size))
+player_img = ImageTk.PhotoImage(player_img)
+
+wall_img = Image.open("C:\\Users\\SWAPNIL\\Desktop\\my project\\Fix ME\\wall.png")
+wall_img = wall_img.resize((grid_size,grid_size))
+wall_img = ImageTk.PhotoImage(wall_img)
+
+canvas = Canvas(main_window,width=800,height=800,background="#009900")
+canvas.place(x=100,y=32)
+
+info_frame = Frame(main_window,width=500,height=400,background="#009900")
+info_frame.place(x=1000,y=32)
+
+level_number = 0
+level_number_l = Label(info_frame,text=f"Level : {level_number}",font=font.BOLD,background="#009900")
+level_number_l.place(x=10,y=10)
+
+total_step = 0
+total_step_l = Label(info_frame,text=f"Total Step : {total_step}",font=font.BOLD,background="#009900")
+total_step_l.place(x=10,y=50)
+
+high_score = 0
+high_score_l = Label(info_frame,text=f"Total Step : {high_score}",font=font.BOLD,background="#009900")
+high_score_l.place(x=10,y=90)
+
+player_x = 1
+player_y = 1
+
+wall_list = [(0,0),(1,0),(2,0),(3,0),(4,0),(0,1),(0,2),(0,3),(0,4),(0,5),(0,6),(1,6),(2,6),(3,6),(4,6),(1,3),(2,3),(4,1),(4,2),(4,3),(4,4),(4,5),(4,6)]
+destination_list = [(1,4),(3,5)]
+box_list = [(2,2),(2,4)]
+
+
+def set_wall(wall_list):
+    for i in range(len(wall_list)):
+        canvas.create_image(wall_list[i][0]*grid_size,wall_list[i][1]*grid_size,anchor=NW,image=wall_img)
+set_wall(wall_list)
+
+def set_destination(destination_list):
+    for i in range(len(destination_list)):
+        canvas.create_image(destination_list[i][0]*grid_size,destination_list[i][1]*grid_size,anchor=NW,image=destination_img)
+set_destination(destination_list)
+
+def set_box(box_list):
+    for i in range(len(box_list)):
+        canvas.create_image(box_list[i][0]*grid_size,box_list[i][1]*grid_size,anchor=NW,image=box_img)
+set_box(box_list)
+
+def set_player(x,y):
+    canvas.create_image(x*grid_size,y*grid_size,anchor=NW,image=player_img)
+    
+def chack_winner(destination_list,box_list):
+    f_list = []
+    for i in range(len(destination_list)):
+        if(destination_list[i] in box_list):
+            f_list.append(True)
+        else:
+            f_list.append(False)
+    if(False in f_list):
+        return False
+    else:
+        return True
+
+
+set_player(player_x,player_y)
+def press_key(e):
+    canvas.delete("all")
+    global player_x,player_y
+    global box_list
+    global total_step
+
+    if(e.keycode==38 and player_y-1>=0 and (player_x,player_y-1) not in wall_list):
+        if((player_x,player_y-1) in box_list):
+            a = box_list.index((player_x,player_y-1))
+            if((box_list[a][0],box_list[a][1]-1) not in wall_list):
+                box_list[a]= (box_list[a][0],box_list[a][1]-1)
+        if((player_x,player_y-1) not in box_list):
+            player_y = player_y - 1
+            total_step = total_step + 1
+
+
+    elif(e.keycode==40 and player_y+1<8 and (player_x,player_y+1) not in wall_list):
+        if((player_x,player_y+1) in box_list):
+            a = box_list.index((player_x,player_y+1))
+            if((box_list[a][0],box_list[a][1]+1) not in wall_list):
+                box_list[a] = (box_list[a][0],box_list[a][1]+1)
+        if((player_x,player_y+1) not in box_list):
+            player_y = player_y + 1
+            total_step = total_step + 1
+
+
+    elif(e.keycode==37 and player_x-1>=0 and (player_x-1,player_y) not in wall_list):
+        if((player_x-1,player_y) in box_list):
+            a = box_list.index((player_x-1,player_y))
+            if((box_list[a][0]-1,box_list[a][1]) not in wall_list):
+                box_list[a] = (box_list[a][0]-1,box_list[a][1])
+        if((player_x-1,player_y) not in box_list):
+            player_x = player_x - 1
+            total_step = total_step + 1
+
+
+    elif(e.keycode==39 and player_x+1<8 and (player_x+1,player_y) not in wall_list):
+        if((player_x+1,player_y) in box_list):
+            a = box_list.index((player_x+1,player_y))
+            if((box_list[a][0]+1,box_list[a][1]) not in wall_list):
+                box_list[a] = (box_list[a][0]+1,box_list[a][1])
+        if((player_x+1,player_y) not in box_list):
+            player_x = player_x + 1
+            total_step = total_step + 1
+
+
+
+    set_player(player_x,player_y)
+    set_wall(wall_list)
+    set_box(box_list)
+    set_destination(destination_list)
+    total_step_l.configure(text=f"Total Step : {total_step}")
+
+    if(chack_winner(destination_list,box_list)):
+        a = messagebox.askquestion("Completed..","Do you to Play next Level ?")
+
+    
+main_window.bind("<Key>",press_key)             
+
+main_window.mainloop()
